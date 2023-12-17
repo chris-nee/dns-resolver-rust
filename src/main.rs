@@ -25,7 +25,7 @@ impl DnsHeader {
     ) -> Self {
         let bytes = [
             (id >> 8) as u8,
-            (id << 8) as u8,
+            id as u8,
             qr << 7 | opcode << 3 | aa << 2 | tc << 1 | rd,
             ra << 7 | z << 4 | rcode,
             qdcount as u8,

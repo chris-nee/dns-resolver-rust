@@ -108,7 +108,7 @@ fn main() {
                     }
                 };
 
-                let header = DnsHeader::new(1234, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                let header = DnsHeader::new(1234, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0);
                 let mut response = Vec::new();
                 response.extend(header.encode().into_iter());
 

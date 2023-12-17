@@ -1,6 +1,5 @@
 // Uncomment this block to pass the first stage
 use std::net::UdpSocket;
-use std::str;
 
 // DNS Header
 pub struct DnsHeader {
@@ -97,16 +96,6 @@ fn main() {
                 let _received_data = String::from_utf8_lossy(&buf[0..size]);
                 println!("Received {} bytes from {}", size, source);
                 println!("Received data: {:?}", &buf[..size]);
-
-                // Simply for printing
-                match str::from_utf8(&buf[0..size]) {
-                    Ok(received_str) => {
-                        println!("parsed: {}", received_str)
-                    }
-                    Err(_e) => {
-                        println!("Err parsing utf8")
-                    }
-                };
 
                 let mut response = Vec::new();
 

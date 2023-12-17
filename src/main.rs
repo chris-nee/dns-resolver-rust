@@ -46,6 +46,43 @@ impl DnsHeader {
     }
 }
 
+// DNS Question
+pub struct DnsQuestion {
+    domain_name: String,
+    query_type: u16,
+    query_class: u16,
+}
+
+impl DnsQuestion {
+    pub fn new(domain_name: String, query_type: u16, query_class: u16) -> Self {
+        Self {
+            domain_name,
+            query_type,
+            query_class,
+        }
+    }
+
+    fn encode_domain_name(&self) -> Vec<u8> {
+        let mut bytes = vec![];
+        self.domain_name.split('.').for_each(|x| {
+            bytes.extend((x.len() as u8).to_be_bytes().into_iter());
+            bytes.extend(x.as_bytes());
+        });
+
+        bytes.push(0);
+        bytes
+    }
+
+    pub fn encode(&self) -> Vec<u8> {
+        let mut bytes = Vec::new();
+        bytes.extend(self.encode_domain_name().into_iter());
+        bytes.extend(self.query_type.to_be_bytes().into_iter());
+        bytes.extend(self.query_class.to_be_bytes().into_iter());
+
+        bytes
+    }
+}
+
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     println!("Logs from your program will appear here!");
@@ -72,7 +109,11 @@ fn main() {
                 };
 
                 let header = DnsHeader::new(1234, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-                let response = header.bytes; // .encode();
+                let mut response = Vec::new();
+                response.extend(header.encode().into_iter());
+
+                let question = DnsQuestion::new("codecrafters.io".to_owned(), 1, 1);
+                response.extend(question.encode().into_iter());
 
                 udp_socket
                     .send_to(&response, source)

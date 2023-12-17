@@ -108,15 +108,16 @@ fn main() {
                     }
                 };
 
-                let header = DnsHeader::new(1234, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0);
                 let mut response = Vec::new();
+
+                let header = DnsHeader::new(1234, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0);
                 response.extend(header.encode().into_iter());
 
                 let question = DnsQuestion::new("codecrafters.io".to_owned(), 1, 1);
                 response.extend(question.encode().into_iter());
 
                 udp_socket
-                    .send_to(&response, source)
+                    .send_to(response.as_bytes(), source)
                     .expect("Failed to send response");
             }
             Err(e) => {

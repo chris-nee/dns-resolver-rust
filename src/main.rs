@@ -75,9 +75,9 @@ impl DnsQuestion {
 
     pub fn encode(&self) -> Vec<u8> {
         let mut bytes = Vec::new();
-        bytes.extend(self.encode_domain_name().into_iter());
-        bytes.extend(self.query_type.to_be_bytes().into_iter());
-        bytes.extend(self.query_class.to_be_bytes().into_iter());
+        bytes.extend(self.encode_domain_name());
+        bytes.extend(self.query_type.to_be_bytes());
+        bytes.extend(self.query_class.to_be_bytes());
 
         bytes
     }

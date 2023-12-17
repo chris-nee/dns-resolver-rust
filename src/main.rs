@@ -89,7 +89,7 @@ fn main() {
 
     // Uncomment this block to pass the first stage
     let udp_socket = UdpSocket::bind("127.0.0.1:2053").expect("Failed to bind to address");
-    let mut buf = [0; 1024];
+    let mut buf = [0; 512];
 
     loop {
         match udp_socket.recv_from(&mut buf) {
@@ -103,7 +103,7 @@ fn main() {
                 let header = DnsHeader::new(1234, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0);
                 response.extend(header.encode().into_iter());
 
-                let question = DnsQuestion::new("codecrafters.io".to_owned(), 1, 1);
+                let question = DnsQuestion::new("codecrafters.io".to_string(), 1, 1);
                 response.extend(question.encode().into_iter());
 
                 udp_socket

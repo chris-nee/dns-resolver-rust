@@ -1,5 +1,5 @@
 // Uncomment this block to pass the first stage
-use nom::AsBytes;
+// use nom::AsBytes;
 use std::net::UdpSocket;
 
 // DNS Header
@@ -111,7 +111,7 @@ fn main() {
                 response.extend(question.encode().into_iter());
 
                 udp_socket
-                    .send_to(response, source)
+                    .send_to(&response, source)
                     .expect("Failed to send response");
             }
             Err(e) => {

@@ -111,7 +111,7 @@ fn main() {
                 response.extend(question.encode().into_iter());
 
                 udp_socket
-                    .send_to(response.as_bytes(), source)
+                    .send_to(response, source)
                     .expect("Failed to send response");
             }
             Err(e) => {

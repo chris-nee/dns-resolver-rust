@@ -69,15 +69,19 @@ impl DnsQuestion {
             bytes.extend(x.as_bytes());
         });
 
-        bytes.push(0);
+        bytes.push(0u8);
         bytes
     }
 
     pub fn encode(&self) -> Vec<u8> {
         let mut bytes = Vec::new();
         bytes.extend(self.encode_domain_name());
-        bytes.extend(self.query_type.to_be_bytes());
-        bytes.extend(self.query_class.to_be_bytes());
+        // bytes.extend(self.query_type.to_be_bytes());
+        bytes.push((self.query_type >> 8) as u8);
+        bytes.push(self.query_type as u8);
+        bytes.push((self.query_class >> 8) as u8);
+        bytes.push(self.query_class as u8);
+        // bytes.extend(self.query_class.to_be_bytes());
 
         bytes
     }
@@ -89,7 +93,7 @@ fn main() {
 
     // Uncomment this block to pass the first stage
     let udp_socket = UdpSocket::bind("127.0.0.1:2053").expect("Failed to bind to address");
-    let mut buf = [0; 1024];
+    let mut buf = [0; 512];
 
     loop {
         match udp_socket.recv_from(&mut buf) {

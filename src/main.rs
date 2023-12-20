@@ -103,7 +103,7 @@ fn main() {
                 let header = DnsHeader::new(1234, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0);
                 response.extend(header.encode().into_iter());
 
-                let question = DnsQuestion::new("codecrafters.io".to_string(), 1, 1);
+                let question = DnsQuestion::new("codecrafters.io".to_owned(), 1, 1);
                 response.extend(question.encode().into_iter());
 
                 udp_socket

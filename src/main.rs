@@ -65,8 +65,7 @@ impl DnsQuestion {
     fn encode_domain_name(&self) -> Vec<u8> {
         let mut bytes = Vec::new();
         self.domain_name.split('.').for_each(|x| {
-            // bytes.extend((x.len() as u8).to_be_bytes());
-            // bytes.push((x.len() as u8);
+            bytes.extend((x.len() as u8).to_be_bytes());
             bytes.extend(x.as_bytes());
         });
 
@@ -76,15 +75,7 @@ impl DnsQuestion {
 
     pub fn encode(&self) -> Vec<u8> {
         let mut bytes = Vec::new();
-
-        self.domain_name.split('.').for_each(|x| {
-            // bytes.extend((x.len() as u8).to_be_bytes());
-            bytes.push(x.len() as u8);
-            bytes.extend(x.as_bytes());
-        });
-
-        bytes.push(0);
-        // bytes.extend(self.encode_domain_name());
+        bytes.extend(self.encode_domain_name());
         bytes.extend(self.query_type.to_be_bytes());
         bytes.extend(self.query_class.to_be_bytes());
 
@@ -112,7 +103,7 @@ fn main() {
                 let header = DnsHeader::new(1234, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0);
                 response.extend(header.encode().into_iter());
 
-                let question = DnsQuestion::new("codecrafters.io".to_owned(), 1, 1);
+                let question = DnsQuestion::new("codecrafters.io".to_string(), 1, 1);
                 response.extend(question.encode().into_iter());
 
                 udp_socket

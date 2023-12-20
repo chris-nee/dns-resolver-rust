@@ -65,7 +65,8 @@ impl DnsQuestion {
     fn encode_domain_name(&self) -> Vec<u8> {
         let mut bytes = Vec::new();
         self.domain_name.split('.').for_each(|x| {
-            bytes.extend((x.len() as u8).to_be_bytes());
+            // bytes.extend((x.len() as u8).to_be_bytes());
+            // bytes.push((x.len() as u8);
             bytes.extend(x.as_bytes());
         });
 
@@ -75,7 +76,15 @@ impl DnsQuestion {
 
     pub fn encode(&self) -> Vec<u8> {
         let mut bytes = Vec::new();
-        bytes.extend(self.encode_domain_name());
+
+        self.domain_name.split('.').for_each(|x| {
+            // bytes.extend((x.len() as u8).to_be_bytes());
+            bytes.push(x.len() as u8);
+            bytes.extend(x.as_bytes());
+        });
+
+        bytes.push(0);
+        // bytes.extend(self.encode_domain_name());
         bytes.extend(self.query_type.to_be_bytes());
         bytes.extend(self.query_class.to_be_bytes());
 

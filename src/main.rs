@@ -145,12 +145,6 @@ impl DNSHeader {
     }
 }
 
-const HEADER_SIZE: usize = 12; // bytes
-
-fn get_header_slice(src: &[u8]) -> [u8; 12] {
-    return src.try_into().expect("size of HEADER_SIZE");
-}
-
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     println!("Logs from your program will appear here!");
@@ -158,11 +152,14 @@ fn main() {
     let udp_socket = UdpSocket::bind("127.0.0.1:2053").expect("Failed to bind to address");
     let mut buf = [0; 512];
 
+    const HEADER_SIZE: usize = 12; // bytes
+
     loop {
         match udp_socket.recv_from(&mut buf) {
             Ok((size, source)) => {
                 // let _received_data = String::from_utf8_lossy(&buf[0..size]);
-                let _received_header: [u8; HEADER_SIZE] = get_header_slice(&buf);
+                let mut _received_header = [0 as u8; HEADER_SIZE];
+                _received_header.copy_from_slice(&buf[0..HEADER_SIZE]);
 
                 println!("Received {} bytes from {}", size, source);
 

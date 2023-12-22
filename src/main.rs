@@ -145,19 +145,42 @@ impl DNSHeader {
     }
 }
 
+const HEADER_SIZE: usize = 12; // bytes
+
+fn get_header_slice(src: &[u8]) -> [u8; HEADER_SIZE] {
+    return src.try_into().expect("size of HEADER_SIZE");
+}
+
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     println!("Logs from your program will appear here!");
     // Uncomment this block to pass the first stage
     let udp_socket = UdpSocket::bind("127.0.0.1:2053").expect("Failed to bind to address");
     let mut buf = [0; 512];
+
     loop {
         match udp_socket.recv_from(&mut buf) {
             Ok((size, source)) => {
-                let _received_data = String::from_utf8_lossy(&buf[0..size]);
+                // let _received_data = String::from_utf8_lossy(&buf[0..size]);
+                let _received_header: [u8; HEADER_SIZE] = get_header_slice(&buf);
+
                 println!("Received {} bytes from {}", size, source);
 
-                let header = DNSHeader::new(1234, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0);
+                let header = DNSHeader::new(
+                    (_received_header[0] as u16) << 8 | _received_header[1] as u16,
+                    _received_header[2] as u8 & ((1 as u8) << 7),
+                    _received_header[2] as u8 & ((15 as u8) << 3),
+                    _received_header[2] as u8 & ((1 as u8) << 2),
+                    _received_header[2] as u8 & ((1 as u8) << 1),
+                    _received_header[2] as u8 & (1 as u8),
+                    _received_header[3] as u8 & ((1 as u8) << 7),
+                    _received_header[3] as u8 & ((7 as u8) << 4),
+                    _received_header[3] as u8 & (15 as u8),
+                    (_received_header[4] as u16) << 8 | _received_header[5] as u16,
+                    (_received_header[6] as u16) << 8 | _received_header[7] as u16,
+                    (_received_header[8] as u16) << 8 | _received_header[9] as u16,
+                    (_received_header[10] as u16) << 8 | _received_header[11] as u16,
+                );
                 let question = DNSQuestion::new("codecrafters.io".to_string(), 1, 1);
                 let answer =
                     DNSAnswer::new("codecrafters.io".to_string(), 1, 1, 60, 4, vec![8, 8, 8, 8]);

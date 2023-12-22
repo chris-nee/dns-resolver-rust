@@ -209,7 +209,7 @@ fn main() {
                 }
 
                 let mut _received_question: Vec<u8> = Vec::new();
-                _received_header.copy_from_slice(&buf[HEADER_SIZE + 1..size]);
+                _received_header.copy_from_slice(&buf[HEADER_SIZE..]);
 
                 let mut question = DNSQuestion::new("codecrafters.io".to_string(), 1, 1);
                 question.extend_question(&_received_header);

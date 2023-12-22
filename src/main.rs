@@ -208,7 +208,7 @@ fn main() {
                     header.r_code = 4;
                 }
 
-                let mut _received_question: Vec<u8> = Vec::new();
+                let mut _received_question = [0 as u8; 500];
                 _received_question.copy_from_slice(&buf[HEADER_SIZE..]);
 
                 let mut question = DNSQuestion::new("codecrafters.io".to_string(), 1, 1);

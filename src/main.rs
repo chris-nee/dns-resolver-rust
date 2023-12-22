@@ -181,6 +181,10 @@ fn main() {
                 header.qr = 1;
                 header.an_count = 1;
 
+                if header.opcode != 0 {
+                    header.r_code = 4;
+                }
+
                 let question = DNSQuestion::new("codecrafters.io".to_string(), 1, 1);
                 let answer =
                     DNSAnswer::new("codecrafters.io".to_string(), 1, 1, 60, 4, vec![8, 8, 8, 8]);

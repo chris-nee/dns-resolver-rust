@@ -62,6 +62,30 @@ impl DNSQuestion {
         }
     }
 
+    pub fn extend_question(&mut self, byte_arr: &[u8]) {
+        let mut count: u8 = byte_arr[0] as u8;
+        let mut idx: usize = 1;
+        let mut str_item = String::new();
+
+        while count > 0 {
+            str_item.push(byte_arr[idx] as char);
+            idx += 1;
+            count -= 1;
+
+            if count == 0 {
+                str_item.push_str(".");
+                count = byte_arr[idx];
+                idx += 1;
+            }
+        }
+
+        str_item.pop(); // remove the last "."
+
+        self.domain_name = str_item.to_string(); //  = str_item;
+        self.query_type = byte_arr[idx] as u16 | byte_arr[idx + 1] as u16;
+        self.query_class = byte_arr[idx + 2] as u16 | byte_arr[idx + 3] as u16;
+    }
+
     fn to_be_bytes(&self) -> Vec<u8> {
         let mut bytes: Vec<u8> = Vec::new();
 
@@ -180,14 +204,18 @@ fn main() {
                 );
                 header.qr = 1;
                 header.an_count = 1;
-
                 if header.opcode != 0 {
                     header.r_code = 4;
                 }
 
-                let question = DNSQuestion::new("codecrafters.io".to_string(), 1, 1);
+                let mut _received_question: Vec<u8> = Vec::new();
+                _received_header.copy_from_slice(&buf[HEADER_SIZE + 1..size]);
+
+                let mut question = DNSQuestion::new("codecrafters.io".to_string(), 1, 1);
+                question.extend_question(&_received_header);
+
                 let answer =
-                    DNSAnswer::new("codecrafters.io".to_string(), 1, 1, 60, 4, vec![8, 8, 8, 8]);
+                    DNSAnswer::new(question.domain_name.clone(), 1, 1, 60, 4, vec![8, 8, 8, 8]);
 
                 let mut response = Vec::new();
 

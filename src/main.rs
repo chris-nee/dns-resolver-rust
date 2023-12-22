@@ -159,7 +159,7 @@ fn main() {
             Ok((size, source)) => {
                 // let _received_data = String::from_utf8_lossy(&buf[0..size]);
                 let mut _received_header = [0 as u8; HEADER_SIZE];
-                _received_header.copy_from_slice(&buf[0..HEADER_SIZE]);
+                _received_header.copy_from_slice(&buf[0..size]);
 
                 println!("Received {} bytes from {}", size, source);
 

@@ -209,10 +209,10 @@ fn main() {
                 }
 
                 let mut _received_question: Vec<u8> = Vec::new();
-                _received_header.copy_from_slice(&buf[HEADER_SIZE..]);
+                _received_question.copy_from_slice(&buf[HEADER_SIZE..]);
 
                 let mut question = DNSQuestion::new("codecrafters.io".to_string(), 1, 1);
-                question.extend_question(&_received_header);
+                question.extend_question(&_received_question);
 
                 let answer =
                     DNSAnswer::new(question.domain_name.clone(), 1, 1, 60, 4, vec![8, 8, 8, 8]);

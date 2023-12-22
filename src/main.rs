@@ -159,11 +159,11 @@ fn main() {
             Ok((size, source)) => {
                 // let _received_data = String::from_utf8_lossy(&buf[0..size]);
                 let mut _received_header = [0 as u8; HEADER_SIZE];
-                _received_header.copy_from_slice(&buf[0..size]);
+                _received_header.copy_from_slice(&buf[0..HEADER_SIZE]);
 
                 println!("Received {} bytes from {}", size, source);
 
-                let header = DNSHeader::new(
+                let mut header = DNSHeader::new(
                     (_received_header[0] as u16) << 8 | _received_header[1] as u16,
                     (_received_header[2] as u8 & ((0b00000001) << 7)) >> 7,
                     (_received_header[2] as u8 & ((0b00001111) << 3)) >> 3,
@@ -178,6 +178,8 @@ fn main() {
                     (_received_header[8] as u16) << 8 | _received_header[9] as u16,
                     (_received_header[10] as u16) << 8 | _received_header[11] as u16,
                 );
+                header.qr = 1;
+
                 let question = DNSQuestion::new("codecrafters.io".to_string(), 1, 1);
                 let answer =
                     DNSAnswer::new("codecrafters.io".to_string(), 1, 1, 60, 4, vec![8, 8, 8, 8]);

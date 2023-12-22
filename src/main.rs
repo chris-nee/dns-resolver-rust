@@ -44,22 +44,36 @@ struct DNSHeader {
     rs_count: u16,
     ar_count: u16,
 }
-impl Default for DNSHeader {
-    fn default() -> Self {
+impl DNSHeader {
+    fn new(
+        id: u16,
+        qr: u8,
+        opcode: u8,
+        aa: u8,
+        tc: u8,
+        rd: u8,
+        ra: u8,
+        z: u8,
+        r_code: u8,
+        qd_count: u16,
+        an_count: u16,
+        rs_count: u16,
+        ar_count: u16,
+    ) -> Self {
         DNSHeader {
-            id: 1234,
-            qr: 1,
-            opcode: 0,
-            aa: 0,
-            tc: 0,
-            rd: 0,
-            ra: 0,
-            z: 0,
-            r_code: 0,
-            qd_count: 0,
-            an_count: 0,
-            rs_count: 0,
-            ar_count: 0,
+            id,
+            qr,
+            opcode,
+            aa,
+            tc,
+            rd,
+            ra,
+            z,
+            r_code,
+            qd_count,
+            an_count,
+            rs_count,
+            ar_count,
         }
     }
 }
@@ -90,9 +104,10 @@ fn main() {
             Ok((size, source)) => {
                 let _received_data = String::from_utf8_lossy(&buf[0..size]);
                 println!("Received {} bytes from {}", size, source);
-                let mut header = DNSHeader::default();
-                header.qd_count = 1;
+                let header = DNSHeader::new(1234, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0);
+
                 let question = DNSQuestion::new("codecrafters.io".to_string(), 1, 1);
+
                 let mut response = Vec::new();
                 response.extend(header.to_be_bytes());
 

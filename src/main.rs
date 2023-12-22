@@ -147,7 +147,7 @@ impl DNSHeader {
 
 const HEADER_SIZE: usize = 12; // bytes
 
-fn get_header_slice(src: &[u8]) -> [u8; HEADER_SIZE] {
+fn get_header_slice(src: &[u8]) -> [u8; 12] {
     return src.try_into().expect("size of HEADER_SIZE");
 }
 

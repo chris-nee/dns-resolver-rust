@@ -23,8 +23,8 @@ impl DNSQuestion {
         }
         bytes.push(0);
 
-        bytes.extend(self.query_type.to_be_bytes());
-        bytes.extend(self.query_class.to_be_bytes());
+        bytes.extend_from_slice(&self.query_type.to_be_bytes());
+        bytes.extend_from_slice(&self.query_class.to_be_bytes());
 
         bytes.try_into().expect("err")
     }

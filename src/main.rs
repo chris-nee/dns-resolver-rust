@@ -179,6 +179,7 @@ fn main() {
                     (_received_header[10] as u16) << 8 | _received_header[11] as u16,
                 );
                 header.qr = 1;
+                header.an_count = 1;
 
                 let question = DNSQuestion::new("codecrafters.io".to_string(), 1, 1);
                 let answer =

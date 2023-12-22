@@ -1,4 +1,53 @@
 use std::net::UdpSocket;
+
+struct DNSAnswer {
+    name: String,
+    field_type: u16,
+    class: u16,
+    ttl: u32,
+    rd_len: u16,
+    rdata: Vec<u8>,
+}
+
+impl DNSAnswer {
+    fn new(
+        name: String,
+        field_type: u16,
+        class: u16,
+        ttl: u32,
+        rd_len: u16,
+        rdata: Vec<u8>,
+    ) -> Self {
+        Self {
+            name,
+            field_type,
+            class,
+            ttl,
+            rd_len,
+            rdata,
+        }
+    }
+
+    fn to_be_bytes(&self) -> Vec<u8> {
+        let mut bytes: Vec<u8> = Vec::new();
+
+        let parts = self.name.split(".");
+        for part in parts {
+            bytes.push(part.len() as u8);
+            bytes.extend_from_slice(part.as_bytes());
+        }
+        bytes.push(0);
+
+        bytes.extend(self.field_type.to_be_bytes());
+        bytes.extend(self.class.to_be_bytes());
+        bytes.extend(self.ttl.to_be_bytes());
+        bytes.extend(self.rd_len.to_be_bytes());
+        bytes.extend(self.rdata.iter());
+
+        bytes
+    }
+}
+
 struct DNSQuestion {
     domain_name: String,
     query_type: u16,
@@ -29,6 +78,7 @@ impl DNSQuestion {
         bytes.try_into().expect("err")
     }
 }
+
 struct DNSHeader {
     id: u16,
     qr: u8,
@@ -94,6 +144,7 @@ impl DNSHeader {
         bytes.try_into().expect("[u8; 12]")
     }
 }
+
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     println!("Logs from your program will appear here!");
@@ -105,15 +156,17 @@ fn main() {
             Ok((size, source)) => {
                 let _received_data = String::from_utf8_lossy(&buf[0..size]);
                 println!("Received {} bytes from {}", size, source);
-                let header = DNSHeader::new(1234, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0);
 
+                let header = DNSHeader::new(1234, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0);
                 let question = DNSQuestion::new("codecrafters.io".to_string(), 1, 1);
+                let answer =
+                    DNSAnswer::new("codecrafters.io".to_string(), 1, 1, 60, 4, vec![8, 8, 8, 8]);
 
                 let mut response = Vec::new();
 
                 response.extend(header.to_be_bytes());
-
                 response.extend(question.to_be_bytes());
+                response.extend(answer.to_be_bytes());
 
                 udp_socket
                     .send_to(&response, source)

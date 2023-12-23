@@ -92,7 +92,7 @@ impl DNSQuestion {
                     u16::from_be_bytes([byte_arr[idx], byte_arr[idx + 1]]) as usize;
 
                 offset &= 0b0011111111111111;
-                offset -= 12; // account for header
+                // offset -= 12; // account for header
                 let label_len: usize = byte_arr[offset] as usize;
                 str_item.extend_from_slice(&byte_arr[offset + 1..offset + 1 + label_len]);
                 str_item.push(46); // "."

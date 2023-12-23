@@ -63,27 +63,39 @@ impl DNSQuestion {
     }
 
     pub fn extend_question(&mut self, byte_arr: &[u8]) {
-        let mut count: u8 = byte_arr[0] as u8;
-        let mut idx: usize = 1;
-        let mut str_item = String::new();
+        let mut idx: usize = 0;
+        let mut str_item: Vec<u8> = Vec::<u8>::new();
 
-        while count > 0 {
-            str_item.push(byte_arr[idx] as char);
-            idx += 1;
-            count -= 1;
+        while idx < byte_arr.len() {
+            if byte_arr[idx] as u8 == 0 {
+                if str_item.len() == 0 {
+                    break;
+                }
+                str_item.pop(); // remove the last "."
+                self.domain_name = String::from_utf8(str_item.clone()).unwrap();
+                self.query_type = byte_arr[idx] as u16 | byte_arr[idx + 1] as u16;
+                self.query_class = byte_arr[idx + 2] as u16 | byte_arr[idx + 3] as u16;
+            }
 
-            if count == 0 {
-                str_item.push_str(".");
-                count = byte_arr[idx];
+            let msg_type = ((byte_arr[idx] as u8) >> 6) & 0b00000011;
+            if msg_type == 3 {
+                // compressed
+                let mut offset: usize =
+                    u16::from_be_bytes([byte_arr[idx], byte_arr[idx + 1]]) as usize;
+
+                offset &= 0b0011111111111111;
+                offset -= 12; // account for header
+                let label_len: usize = byte_arr[offset] as usize;
+                str_item.extend_from_slice(&byte_arr[offset + 1..offset + 1 + label_len]);
+                str_item.push(46); // "."
                 idx += 1;
+            } else {
+                let label_len = byte_arr[idx] as usize;
+                str_item.extend_from_slice(&byte_arr[idx + 1..idx + 1 + label_len]);
+                str_item.push(46); // "."
+                idx += label_len + 1;
             }
         }
-
-        str_item.pop(); // remove the last "."
-
-        self.domain_name = str_item.to_string(); //  = str_item;
-        self.query_type = byte_arr[idx] as u16 | byte_arr[idx + 1] as u16;
-        self.query_class = byte_arr[idx + 2] as u16 | byte_arr[idx + 3] as u16;
     }
 
     fn to_be_bytes(&self) -> Vec<u8> {

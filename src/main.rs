@@ -1,5 +1,7 @@
 use std::net::UdpSocket;
 
+use nom::AsBytes;
+
 struct DNSAnswer {
     name: String,
     field_type: u16,
@@ -91,7 +93,7 @@ impl DNSQuestion {
                 str_item.extend_from_slice(&byte_arr[offset + 1..offset + 1 + label_len]);
                 str_item.push(46); // "."
                 idx += 1;
-            } else {
+            } else if msg_type == 0 {
                 let label_len = byte_arr[idx] as usize;
                 str_item.extend_from_slice(&byte_arr[idx + 1..idx + 1 + label_len]);
                 str_item.push(46); // "."

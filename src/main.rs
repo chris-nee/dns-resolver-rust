@@ -75,6 +75,8 @@ impl DNSQuestion {
                 self.domain_name = String::from_utf8(str_item.clone()).unwrap();
                 self.query_type = byte_arr[idx] as u16 | byte_arr[idx + 1] as u16;
                 self.query_class = byte_arr[idx + 2] as u16 | byte_arr[idx + 3] as u16;
+                idx += 5;
+                continue;
             }
 
             let msg_type = ((byte_arr[idx] as u8) >> 6) & 0b00000011;

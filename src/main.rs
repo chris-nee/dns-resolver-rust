@@ -65,6 +65,10 @@ impl DNSQuestion {
     }
 
     pub fn extend_question(&mut self, byte_arr: &[u8]) {
+        if byte_arr.len() < 5 {
+            return;
+        }
+
         let mut idx: usize = 0;
         let mut str_item: Vec<u8> = Vec::<u8>::new();
 

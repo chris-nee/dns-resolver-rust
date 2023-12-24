@@ -217,7 +217,7 @@ fn main() {
 
                 let mut header = DNSHeader::from_bytes(&byte_arr, 0);
                 header.qr = 1;
-                // header.an_count = 1;
+                header.an_count = 1;
                 if header.opcode != 0 {
                     header.r_code = 4;
                 }

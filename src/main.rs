@@ -67,13 +67,13 @@ impl DNSQuestion {
         let mut str_item: Vec<u8> = Vec::<u8>::new();
 
         while idx < byte_arr.len() {
-            println!("THE LEN {}", str_item.len());
             if byte_arr[idx] as u8 == 0 {
                 if str_item.len() == 0 {
+                    idx += byte_arr.len();
                     break;
                 }
                 str_item.pop(); // remove the last "."
-                idx += 5;
+                idx += byte_arr.len();
                 continue;
             }
 

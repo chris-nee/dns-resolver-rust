@@ -79,18 +79,19 @@ impl DNSQuestion {
             let msg_type = ((byte_arr[idx] as u8) >> 6) & 0b00000011;
             if msg_type == 3 {
                 // compressed
-                let mut offset: usize =
+                let mut idx_offset: usize =
                     u16::from_be_bytes([byte_arr[idx], byte_arr[idx + 1]]) as usize;
 
-                offset &= 0b0011111111111111;
-                // offset -= 12; // account for header
-                let label_len: usize = byte_arr[offset] as usize;
-                str_item.extend_from_slice(&byte_arr[offset + 1..offset + 1 + label_len]);
+                idx_offset &= 0b0011111111111111;
+                idx_offset -= 12; // account for header
+                let label_len: usize = byte_arr[idx_offset] as usize;
+                str_item.extend_from_slice(&byte_arr[idx_offset + 1..idx_offset + 1 + label_len]);
                 str_item.push(46); // "."
                 idx += 1;
             } else if msg_type == 0 {
                 let label_len = byte_arr[idx] as usize;
                 str_item.extend_from_slice(&byte_arr[idx + 1..idx + 1 + label_len]);
+
                 str_item.push(46); // "."
                 idx += label_len + 1;
             }
@@ -210,9 +211,6 @@ fn main() {
                 if header.opcode != 0 {
                     header.r_code = 4;
                 }
-
-                // let mut _received_question = [0 as u8; 500];
-                // _received_question.copy_from_slice(&buf[HEADER_SIZE..]);
 
                 let question = DNSQuestion::from_bytes(&byte_arr, HEADER_SIZE);
 

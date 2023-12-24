@@ -298,7 +298,6 @@ fn main() {
 
                 for _ in 0..header.qd_count {
                     let question = DNSQuestion::from_bytes(&byte_arr, q_offset);
-                    response.extend(question.to_bytes());
                     question_packets.push(question.clone());
 
                     q_offset += question.to_bytes().len();
@@ -308,13 +307,12 @@ fn main() {
                     let mut clone_header = header.clone(); //.qd_count = 1;
                     clone_header.qd_count = 1;
                     query.extend(clone_header.to_bytes());
-                    query.extend(question.clone().to_bytes());
+                    query.extend(question.to_bytes());
 
                     println!("SENDING");
                     udp_socket_2
                         .send_to(&query, &resolver.clone())
                         .expect("Unable to send to resolver");
-
                     println!("SENT");
 
                     println!("RECEIVING");

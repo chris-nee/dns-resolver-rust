@@ -240,6 +240,7 @@ fn main() {
                     let answer =
                         DNSAnswer::new(question_domain_name.clone(), 1, 1, 60, 4, vec![8, 8, 8, 8]);
                     response.extend(answer.to_bytes());
+                    // test
                 }
 
                 udp_socket

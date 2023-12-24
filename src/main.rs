@@ -215,23 +215,32 @@ fn main() {
 
                 println!("Received {} bytes from {}", size, source);
 
+                let mut response = Vec::new();
+
                 let mut header = DNSHeader::from_bytes(&byte_arr, 0);
                 header.qr = 1;
                 header.an_count = header.qd_count;
                 if header.opcode != 0 {
                     header.r_code = 4;
                 }
-
-                let question = DNSQuestion::from_bytes(&byte_arr, HEADER_SIZE);
-
-                let answer =
-                    DNSAnswer::new(question.domain_name.clone(), 1, 1, 60, 4, vec![8, 8, 8, 8]);
-
-                let mut response = Vec::new();
-
                 response.extend(header.to_bytes());
-                response.extend(question.to_bytes());
-                response.extend(answer.to_bytes());
+
+                let mut question_domain_names: Vec<String> = Vec::new();
+
+                let mut q_offset = HEADER_SIZE;
+
+                for _ in 0..header.qd_count {
+                    let question = DNSQuestion::from_bytes(&byte_arr, q_offset);
+                    response.extend(question.to_bytes());
+                    question_domain_names.push(question.domain_name.clone());
+                    q_offset += question.to_bytes().len();
+                }
+
+                for question_domain_name in question_domain_names {
+                    let answer =
+                        DNSAnswer::new(question_domain_name.clone(), 1, 1, 60, 4, vec![8, 8, 8, 8]);
+                    response.extend(answer.to_bytes());
+                }
 
                 udp_socket
                     .send_to(&response, source)

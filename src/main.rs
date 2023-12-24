@@ -206,7 +206,7 @@ fn main() {
 
                 let mut header = DNSHeader::from_bytes(&byte_arr, 0);
                 header.qr = 1;
-                header.an_count = 1;
+                // header.an_count = 1;
                 if header.opcode != 0 {
                     header.r_code = 4;
                 }
@@ -222,8 +222,8 @@ fn main() {
                 let mut response = Vec::new();
 
                 response.extend(header.to_bytes());
-                // response.extend(question.to_bytes());
-                // response.extend(answer.to_bytes());
+                response.extend(question.to_bytes());
+                response.extend(answer.to_bytes());
 
                 udp_socket
                     .send_to(&response, source)

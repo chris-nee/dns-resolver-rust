@@ -1,4 +1,4 @@
-use std::net::UdpSocket;
+use std::{env, net::UdpSocket};
 
 #[derive(Default, Clone, Debug)]
 struct DNSAnswer {
@@ -257,11 +257,15 @@ impl DNSHeader {
 }
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    println!("{:?}", args);
+
+    let resolver = args[2].clone();
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     println!("Logs from your program will appear here!");
     // Uncomment this block to pass the first stage
     let udp_socket = UdpSocket::bind("127.0.0.1:2053").expect("Failed to bind to address");
-    let udp_socket_2 = UdpSocket::bind("127.0.0.1:2054").expect("Failed to bind to address");
+    let udp_socket_2 = UdpSocket::bind("0.0.0.0:0").expect("Failed to bind to address");
     let mut buf = [0; 512];
 
     const HEADER_SIZE: usize = 12; // bytes
@@ -303,7 +307,7 @@ fn main() {
                     query.extend(question.clone().to_bytes());
 
                     udp_socket_2
-                        .send_to(&query, "127.0.0.1:2054")
+                        .send_to(&query, &resolver)
                         .expect("Unable to send to resolver");
 
                     let mut recv_buf: [u8; 1024] = [0; 1024];

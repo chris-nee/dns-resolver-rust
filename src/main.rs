@@ -66,14 +66,23 @@ impl DNSQuestion {
         let mut idx: usize = offset;
         let mut str_item: Vec<u8> = Vec::<u8>::new();
 
-        while idx < byte_arr.len() {
+        let mut should_break = false;
+
+        while idx < byte_arr.len() || should_break == false {
             if byte_arr[idx] as u8 == 0 {
+                should_break = true;
+
                 if str_item.len() == 0 {
-                    idx += byte_arr.len();
+                    idx += 1; // byte_arr.len();
                     break;
                 }
+
                 str_item.pop(); // remove the last "."
-                idx += byte_arr.len();
+                idx += 1; //byte_arr.len();
+                continue;
+            }
+
+            if should_break {
                 continue;
             }
 

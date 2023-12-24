@@ -28,6 +28,80 @@ impl DNSAnswer {
         }
     }
 
+    fn from_bytes(byte_arr: Vec<u8>, offset: usize) -> Self {
+        if offset + 5 >= byte_arr.len() {
+            return Self {
+                name: String::new(),
+                field_type: 1,
+                class: 1,
+                ttl: 60,
+                rd_len: 4,
+                rdata: vec![8, 8, 8, 8],
+            };
+        }
+
+        let mut idx: usize = offset;
+        let mut str_item: Vec<u8> = Vec::<u8>::new();
+
+        let mut should_break = false;
+
+        while idx < byte_arr.len() && should_break == false {
+            if byte_arr[idx] as u8 == 0 {
+                should_break = true;
+
+                if str_item.len() == 0 {
+                    idx += 1; // byte_arr.len();
+                    break;
+                }
+
+                str_item.pop(); // remove the last "."
+                idx += 1; //byte_arr.len();
+                continue;
+            }
+
+            if should_break {
+                continue;
+            }
+
+            let msg_type = ((byte_arr[idx] as u8) >> 6) & 0b00000011;
+            if msg_type == 3 {
+                // compressed
+                let mut idx_offset: usize =
+                    u16::from_be_bytes([byte_arr[idx], byte_arr[idx + 1]]) as usize;
+
+                idx_offset &= 0b0011111111111111;
+                // idx_offset -= 12; // account for header
+                let label_len: usize = byte_arr[idx_offset] as usize;
+                str_item.extend_from_slice(&byte_arr[idx_offset + 1..idx_offset + 1 + label_len]);
+                str_item.push(46); // "."
+                idx += 1;
+            } else if msg_type == 0 {
+                let label_len = byte_arr[idx] as usize;
+                str_item.extend_from_slice(&byte_arr[idx + 1..idx + 1 + label_len]);
+
+                str_item.push(46); // "."
+                idx += label_len + 1;
+            }
+        }
+
+        Self {
+            name: String::from_utf8(str_item.clone()).unwrap(),
+            field_type: byte_arr[idx] as u16 | byte_arr[idx + 1] as u16,
+            class: byte_arr[idx + 2] as u16 | byte_arr[idx + 3] as u16,
+            ttl: byte_arr[idx + 4] as u32
+                | byte_arr[idx + 5] as u32
+                | byte_arr[idx + 6] as u32
+                | byte_arr[idx + 7] as u32,
+            rd_len: byte_arr[idx + 8] as u16 | byte_arr[idx + 9] as u16,
+            rdata: vec![
+                byte_arr[idx + 10],
+                byte_arr[idx + 11],
+                byte_arr[idx + 12],
+                byte_arr[idx + 13],
+            ],
+        }
+    }
+
     fn to_bytes(&self) -> Vec<u8> {
         let mut bytes: Vec<u8> = Vec::new();
 

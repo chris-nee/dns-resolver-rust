@@ -200,7 +200,7 @@ fn main() {
             Ok((size, source)) => {
                 // let _received_data = String::from_utf8_lossy(&buf[0..size]);
                 let mut byte_arr: Vec<u8> = Vec::new();
-                byte_arr.copy_from_slice(&buf);
+                byte_arr.extend_from_slice(&buf);
 
                 println!("Received {} bytes from {}", size, source);
 

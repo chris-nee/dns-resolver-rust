@@ -311,9 +311,7 @@ fn main() {
                         .expect("Unable to send to resolver");
 
                     let mut recv_buf: [u8; 1024] = [0; 1024];
-                    let (size, _) = udp_socket_2
-                        .recv_from(&mut recv_buf)
-                        .expect("Failed to receive from resolver");
+                    let (size, _) = udp_socket_2.recv_from(&mut recv_buf).unwrap();
 
                     let mut recv_buf_vec = Vec::new();
                     recv_buf_vec.extend_from_slice(&recv_buf[..size]);

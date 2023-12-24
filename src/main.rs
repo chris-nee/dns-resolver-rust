@@ -307,15 +307,16 @@ fn main() {
                     query.extend(question.clone().to_bytes());
 
                     println!("SENDING");
-
                     udp_socket_2
                         .send_to(&query, &resolver.clone())
                         .expect("Unable to send to resolver");
 
                     println!("SENT");
 
+                    println!("RECEIVING");
                     let mut recv_buf: [u8; 1024] = [0; 1024];
                     let (size, _) = udp_socket_2.recv_from(&mut recv_buf).unwrap();
+                    println!("RECEIVED");
 
                     let mut recv_buf_vec = Vec::new();
                     recv_buf_vec.extend_from_slice(&recv_buf[..size]);

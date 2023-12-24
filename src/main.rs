@@ -305,7 +305,9 @@ fn main() {
 
                     // Forward to dns server
                     let mut query = Vec::new();
-                    query.extend(header.clone().to_bytes());
+                    let mut clone_header = header.clone(); //.qd_count = 1;
+                    clone_header.qd_count = 1;
+                    query.extend(clone_header.to_bytes());
                     query.extend(question.clone().to_bytes());
 
                     println!("SENDING");

@@ -272,14 +272,6 @@ fn main() {
 
     const HEADER_SIZE: usize = 12; // bytes
 
-    let mut resolver_2 = None;
-    for arg in std::env::args() {
-        if arg == "--resolver" {
-            resolver_2 = Some(std::env::args().nth(2).unwrap());
-        }
-    }
-    println!(" THE OTHER RESOLVER IS -> {:?}", resolver);
-
     loop {
         match udp_socket.recv_from(&mut buf) {
             Ok((size, source)) => {
@@ -324,7 +316,7 @@ fn main() {
                     println!("SENT");
 
                     println!("RECEIVING");
-                    let mut recv_buf: [u8; 1024] = [0; 1024];
+                    let mut recv_buf: [u8; 512] = [0; 512];
                     let (size, _) = udp_socket_2.recv_from(&mut recv_buf).unwrap();
                     println!("RECEIVED");
 

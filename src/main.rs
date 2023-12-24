@@ -1,5 +1,6 @@
 use std::net::UdpSocket;
 
+#[derive(Default, Clone, Debug)]
 struct DNSAnswer {
     name: String,
     field_type: u16,
@@ -10,25 +11,7 @@ struct DNSAnswer {
 }
 
 impl DNSAnswer {
-    fn new(
-        name: String,
-        field_type: u16,
-        class: u16,
-        ttl: u32,
-        rd_len: u16,
-        rdata: Vec<u8>,
-    ) -> Self {
-        Self {
-            name,
-            field_type,
-            class,
-            ttl,
-            rd_len,
-            rdata,
-        }
-    }
-
-    fn from_bytes(byte_arr: Vec<u8>, offset: usize) -> Self {
+    fn from_bytes(byte_arr: &Vec<u8>, offset: usize) -> Self {
         if offset + 5 >= byte_arr.len() {
             return Self {
                 name: String::new(),
@@ -122,6 +105,7 @@ impl DNSAnswer {
     }
 }
 
+#[derive(Default, Clone, Debug)]
 struct DNSQuestion {
     domain_name: String,
     query_type: u16,
@@ -205,6 +189,7 @@ impl DNSQuestion {
     }
 }
 
+#[derive(Default, Clone, Debug)]
 struct DNSHeader {
     id: u16,
     qr: u8,
@@ -276,6 +261,7 @@ fn main() {
     println!("Logs from your program will appear here!");
     // Uncomment this block to pass the first stage
     let udp_socket = UdpSocket::bind("127.0.0.1:2053").expect("Failed to bind to address");
+    let udp_socket_2 = UdpSocket::bind("127.0.0.1:2054").expect("Failed to bind to address");
     let mut buf = [0; 512];
 
     const HEADER_SIZE: usize = 12; // bytes
@@ -299,23 +285,63 @@ fn main() {
                 }
                 response.extend(header.to_bytes());
 
-                let mut question_domain_names: Vec<String> = Vec::new();
+                let mut question_packets: Vec<DNSQuestion> = Vec::new();
+                let mut answer_packets: Vec<DNSAnswer> = Vec::new();
 
                 let mut q_offset = HEADER_SIZE;
 
                 for _ in 0..header.qd_count {
                     let question = DNSQuestion::from_bytes(&byte_arr, q_offset);
                     response.extend(question.to_bytes());
-                    question_domain_names.push(question.domain_name.clone());
+                    question_packets.push(question.clone());
+
                     q_offset += question.to_bytes().len();
+
+                    // Forward to dns server
+                    let mut query = Vec::new();
+                    query.extend(header.clone().to_bytes());
+                    query.extend(question.clone().to_bytes());
+
+                    udp_socket_2
+                        .send_to(&query, "127.0.0.1:2054")
+                        .expect("Unable to send to resolver");
+
+                    let mut recv_buf: [u8; 1024] = [0; 1024];
+                    let (size, _) = udp_socket_2
+                        .recv_from(&mut recv_buf)
+                        .expect("Failed to receive from resolver");
+
+                    let mut recv_buf_vec = Vec::new();
+                    recv_buf_vec.extend_from_slice(&recv_buf[..size]);
+
+                    let new_header = DNSHeader::from_bytes(&recv_buf_vec, 0);
+
+                    let mut inner_offset = HEADER_SIZE;
+                    for _ in 0..new_header.qd_count {
+                        let new_qn = DNSQuestion::from_bytes(&recv_buf_vec, inner_offset);
+                        inner_offset += new_qn.to_bytes().len();
+
+                        let new_ans = DNSAnswer::from_bytes(&recv_buf_vec, inner_offset);
+                        answer_packets.push(new_ans.clone());
+                    }
                 }
 
+                for question in question_packets {
+                    response.extend(question.to_bytes());
+                }
+
+                for answer in answer_packets {
+                    response.extend(answer.to_bytes());
+                }
+
+                /*
                 for question_domain_name in question_domain_names {
                     let answer =
                         DNSAnswer::new(question_domain_name.clone(), 1, 1, 60, 4, vec![8, 8, 8, 8]);
                     response.extend(answer.to_bytes());
                     // test
                 }
+                */
 
                 udp_socket
                     .send_to(&response, source)

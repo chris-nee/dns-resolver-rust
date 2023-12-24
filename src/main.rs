@@ -67,6 +67,7 @@ impl DNSQuestion {
         let mut str_item: Vec<u8> = Vec::<u8>::new();
 
         while idx < byte_arr.len() {
+            println!("THE LEN {}", str_item.len());
             if byte_arr[idx] as u8 == 0 {
                 if str_item.len() == 0 {
                     break;
@@ -83,7 +84,7 @@ impl DNSQuestion {
                     u16::from_be_bytes([byte_arr[idx], byte_arr[idx + 1]]) as usize;
 
                 idx_offset &= 0b0011111111111111;
-                idx_offset -= 12; // account for header
+                // idx_offset -= 12; // account for header
                 let label_len: usize = byte_arr[idx_offset] as usize;
                 str_item.extend_from_slice(&byte_arr[idx_offset + 1..idx_offset + 1 + label_len]);
                 str_item.push(46); // "."

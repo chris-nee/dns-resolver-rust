@@ -1,7 +1,5 @@
 use std::net::UdpSocket;
 
-use nom::AsBytes;
-
 struct DNSAnswer {
     name: String,
     field_type: u16,
@@ -56,20 +54,16 @@ struct DNSQuestion {
     query_class: u16,
 }
 impl DNSQuestion {
-    fn new(domain_name: String, query_type: u16, query_class: u16) -> Self {
-        Self {
-            domain_name,
-            query_type,
-            query_class,
-        }
-    }
-
-    pub fn extend_question(&mut self, byte_arr: &[u8]) {
-        if byte_arr.len() < 5 {
-            return;
+    pub fn from_bytes(byte_arr: &Vec<u8>, offset: usize) -> Self {
+        if offset + 5 >= byte_arr.len() {
+            return Self {
+                domain_name: String::new(),
+                query_type: 1,
+                query_class: 1,
+            };
         }
 
-        let mut idx: usize = 0;
+        let mut idx: usize = offset;
         let mut str_item: Vec<u8> = Vec::<u8>::new();
 
         while idx < byte_arr.len() {
@@ -78,9 +72,6 @@ impl DNSQuestion {
                     break;
                 }
                 str_item.pop(); // remove the last "."
-                self.domain_name = String::from_utf8(str_item.clone()).unwrap();
-                self.query_type = byte_arr[idx] as u16 | byte_arr[idx + 1] as u16;
-                self.query_class = byte_arr[idx + 2] as u16 | byte_arr[idx + 3] as u16;
                 idx += 5;
                 continue;
             }
@@ -103,6 +94,12 @@ impl DNSQuestion {
                 str_item.push(46); // "."
                 idx += label_len + 1;
             }
+        }
+
+        Self {
+            domain_name: String::from_utf8(str_item.clone()).unwrap(),
+            query_type: byte_arr[idx] as u16 | byte_arr[idx + 1] as u16,
+            query_class: byte_arr[idx + 2] as u16 | byte_arr[idx + 3] as u16,
         }
     }
 
@@ -138,23 +135,24 @@ struct DNSHeader {
     rs_count: u16,
     ar_count: u16,
 }
+
 impl DNSHeader {
-    fn new(
-        id: u16,
-        qr: u8,
-        opcode: u8,
-        aa: u8,
-        tc: u8,
-        rd: u8,
-        ra: u8,
-        z: u8,
-        r_code: u8,
-        qd_count: u16,
-        an_count: u16,
-        rs_count: u16,
-        ar_count: u16,
-    ) -> Self {
-        DNSHeader {
+    fn from_bytes(byte_arr: &Vec<u8>, offset: usize) -> Self {
+        let id = (byte_arr[offset + 0] as u16) << 8 | byte_arr[offset + 1] as u16;
+        let qr = (byte_arr[offset + 2] as u8 & ((0b00000001) << 7)) >> 7;
+        let opcode = (byte_arr[offset + 2] as u8 & ((0b00001111) << 3)) >> 3;
+        let aa = (byte_arr[offset + 2] as u8 & ((0b00000001) << 2)) >> 2;
+        let tc = (byte_arr[offset + 2] as u8 & ((0b00000001) << 1)) >> 1;
+        let rd = byte_arr[offset + 2] as u8 & (0b00000001);
+        let ra = (byte_arr[offset + 3] as u8 & ((0b00000001) << 7)) >> 7;
+        let z = (byte_arr[offset + 3] as u8 & ((0b00000111) << 4)) >> 4;
+        let r_code = byte_arr[offset + 3] as u8 & (0b00001111);
+        let qd_count = (byte_arr[offset + 4] as u16) << 8 | byte_arr[offset + 5] as u16;
+        let an_count = (byte_arr[offset + 6] as u16) << 8 | byte_arr[offset + 7] as u16;
+        let rs_count = (byte_arr[offset + 8] as u16) << 8 | byte_arr[offset + 9] as u16;
+        let ar_count = (byte_arr[offset + 10] as u16) << 8 | byte_arr[offset + 11] as u16;
+
+        Self {
             id,
             qr,
             opcode,
@@ -170,10 +168,9 @@ impl DNSHeader {
             ar_count,
         }
     }
-}
-impl DNSHeader {
+
     // To big-endian bytes
-    fn to_be_bytes(&self) -> [u8; 12] {
+    fn to_bytes(&self) -> [u8; 12] {
         let mut bytes: Vec<u8> = Vec::new();
 
         bytes.extend(&self.id.to_be_bytes());
@@ -202,44 +199,30 @@ fn main() {
         match udp_socket.recv_from(&mut buf) {
             Ok((size, source)) => {
                 // let _received_data = String::from_utf8_lossy(&buf[0..size]);
-                let mut _received_header = [0 as u8; HEADER_SIZE];
-                _received_header.copy_from_slice(&buf[0..HEADER_SIZE]);
+                let mut byte_arr: Vec<u8> = Vec::new();
+                byte_arr.copy_from_slice(&buf);
 
                 println!("Received {} bytes from {}", size, source);
 
-                let mut header = DNSHeader::new(
-                    (_received_header[0] as u16) << 8 | _received_header[1] as u16,
-                    (_received_header[2] as u8 & ((0b00000001) << 7)) >> 7,
-                    (_received_header[2] as u8 & ((0b00001111) << 3)) >> 3,
-                    (_received_header[2] as u8 & ((0b00000001) << 2)) >> 2,
-                    (_received_header[2] as u8 & ((0b00000001) << 1)) >> 1,
-                    _received_header[2] as u8 & (0b00000001),
-                    (_received_header[3] as u8 & ((0b00000001) << 7)) >> 7,
-                    (_received_header[3] as u8 & ((0b00000111) << 4)) >> 4,
-                    _received_header[3] as u8 & (0b00001111),
-                    (_received_header[4] as u16) << 8 | _received_header[5] as u16,
-                    (_received_header[6] as u16) << 8 | _received_header[7] as u16,
-                    (_received_header[8] as u16) << 8 | _received_header[9] as u16,
-                    (_received_header[10] as u16) << 8 | _received_header[11] as u16,
-                );
+                let mut header = DNSHeader::from_bytes(&byte_arr, 0);
                 header.qr = 1;
                 header.an_count = 1;
                 if header.opcode != 0 {
                     header.r_code = 4;
                 }
 
-                let mut _received_question = [0 as u8; 500];
-                _received_question.copy_from_slice(&buf[HEADER_SIZE..]);
+                // let mut _received_question = [0 as u8; 500];
+                // _received_question.copy_from_slice(&buf[HEADER_SIZE..]);
 
-                let mut question = DNSQuestion::new("codecrafters.io".to_string(), 1, 1);
-                question.extend_question(&_received_question);
+                // let mut question = DNSQuestion::new("codecrafters.io".to_string(), 1, 1);
+                let question = DNSQuestion::from_bytes(&byte_arr, HEADER_SIZE);
 
                 let answer =
                     DNSAnswer::new(question.domain_name.clone(), 1, 1, 60, 4, vec![8, 8, 8, 8]);
 
                 let mut response = Vec::new();
 
-                response.extend(header.to_be_bytes());
+                response.extend(header.to_bytes());
                 response.extend(question.to_be_bytes());
                 response.extend(answer.to_be_bytes());
 

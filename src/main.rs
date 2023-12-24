@@ -28,7 +28,7 @@ impl DNSAnswer {
         }
     }
 
-    fn to_be_bytes(&self) -> Vec<u8> {
+    fn to_bytes(&self) -> Vec<u8> {
         let mut bytes: Vec<u8> = Vec::new();
 
         let parts = self.name.split(".");
@@ -103,7 +103,7 @@ impl DNSQuestion {
         }
     }
 
-    fn to_be_bytes(&self) -> Vec<u8> {
+    fn to_bytes(&self) -> Vec<u8> {
         let mut bytes: Vec<u8> = Vec::new();
 
         let parts = self.domain_name.split(".");
@@ -214,7 +214,6 @@ fn main() {
                 // let mut _received_question = [0 as u8; 500];
                 // _received_question.copy_from_slice(&buf[HEADER_SIZE..]);
 
-                // let mut question = DNSQuestion::new("codecrafters.io".to_string(), 1, 1);
                 let question = DNSQuestion::from_bytes(&byte_arr, HEADER_SIZE);
 
                 let answer =
@@ -223,8 +222,8 @@ fn main() {
                 let mut response = Vec::new();
 
                 response.extend(header.to_bytes());
-                response.extend(question.to_be_bytes());
-                response.extend(answer.to_be_bytes());
+                // response.extend(question.to_bytes());
+                // response.extend(answer.to_bytes());
 
                 udp_socket
                     .send_to(&response, source)

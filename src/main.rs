@@ -68,7 +68,7 @@ impl DNSQuestion {
 
         let mut should_break = false;
 
-        while idx < byte_arr.len() || should_break == false {
+        while idx < byte_arr.len() && should_break == false {
             if byte_arr[idx] as u8 == 0 {
                 should_break = true;
 

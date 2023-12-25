@@ -1,5 +1,4 @@
-// use std::{env, net::UdpSocket};
-use std::net::UdpSocket;
+use std::{env, net::UdpSocket};
 
 #[derive(Default, Clone, Debug)]
 struct DNSAnswer {
@@ -12,6 +11,7 @@ struct DNSAnswer {
 }
 
 impl DNSAnswer {
+    /*
     fn new(
         name: String,
         field_type: u16,
@@ -29,7 +29,7 @@ impl DNSAnswer {
             rdata,
         }
     }
-    /*
+    */
     fn from_bytes(byte_arr: &Vec<u8>, offset: usize) -> Self {
         if offset + 5 >= byte_arr.len() {
             return Self {
@@ -104,7 +104,6 @@ impl DNSAnswer {
         }
     }
 
-    */
     fn to_bytes(&self) -> Vec<u8> {
         let mut bytes: Vec<u8> = Vec::new();
 
@@ -130,7 +129,6 @@ struct DNSQuestion {
     domain_name: String,
     query_type: u16,
     query_class: u16,
-    // bytes_read: usize,
 }
 impl DNSQuestion {
     pub fn from_bytes(byte_arr: &Vec<u8>, offset: usize) -> Self {
@@ -145,7 +143,6 @@ impl DNSQuestion {
         let mut idx: usize = offset;
         let mut str_item: Vec<u8> = Vec::<u8>::new();
         let mut should_break = false;
-        // let mut bytes_read = 0;
 
         while idx < byte_arr.len() && should_break == false {
             if byte_arr[idx] as u8 == 0 {
@@ -193,7 +190,6 @@ impl DNSQuestion {
                     String::from_utf8_lossy(&byte_arr.clone()[idx + 1..idx + 1 + label_len])
                 );
                 idx += label_len + 1;
-                // bytes_read += label_len + 1;
             }
         }
 
@@ -201,7 +197,6 @@ impl DNSQuestion {
             domain_name: String::from_utf8(str_item.clone()).unwrap(),
             query_type: byte_arr[idx] as u16 | byte_arr[idx + 1] as u16,
             query_class: byte_arr[idx + 2] as u16 | byte_arr[idx + 3] as u16,
-            //            bytes_read: bytes_read + 4,
         }
     }
 
@@ -289,7 +284,6 @@ impl DNSHeader {
     }
 }
 
-/*
 fn main() {
     let args: Vec<String> = env::args().collect();
     println!("{:?}", args);
@@ -332,7 +326,7 @@ fn main() {
                 let mut myoffset = HEADER_SIZE;
                 for _ in 0..header.qd_count {
                     let question = DNSQuestion::from_bytes(&byte_arr, myoffset);
-                    myoffset += question.bytes_read + 1; // question.to_bytes().len();
+                    myoffset += question.to_bytes().len();
                     println!(
                         "[DEBUG] /// The qn [{:}], The offset [[[{:}]]] ///",
                         question.domain_name.clone(),
@@ -412,7 +406,7 @@ fn main() {
     }
 }
 
-*/
+/*
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     println!("Logs from your program will appear here!");
@@ -478,3 +472,5 @@ fn main() {
         }
     }
 }
+
+*/

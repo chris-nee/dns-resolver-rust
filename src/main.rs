@@ -306,7 +306,8 @@ fn main() {
                     let mut query = Vec::new();
                     let mut clone_header = header.clone(); //.qd_count = 1;
                     clone_header.qd_count = 1;
-                    query.extend(header.to_bytes());
+                    clone_header.qr = 0;
+                    query.extend(clone_header.to_bytes());
                     query.extend(question.to_bytes());
 
                     println!("SENDING");

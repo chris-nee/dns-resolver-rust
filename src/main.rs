@@ -297,6 +297,20 @@ fn main() {
 
                 let mut q_offset = HEADER_SIZE;
 
+                // Just for printing
+                println!(">>> DEBUGGING");
+                for _ in 0..header.qd_count {
+                    let question = DNSQuestion::from_bytes(&byte_arr, q_offset);
+
+                    q_offset += question.to_bytes().len() - 1;
+                    println!(
+                        "[DEBUG] The qn {:}, The offset {:}",
+                        question.domain_name.clone(),
+                        q_offset.clone()
+                    );
+                }
+                println!("<<< DEBUGGING");
+
                 for _ in 0..header.qd_count {
                     let question = DNSQuestion::from_bytes(&byte_arr, q_offset);
 

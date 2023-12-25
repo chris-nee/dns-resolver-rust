@@ -336,7 +336,7 @@ fn main() {
 
                     let new_header = DNSHeader::from_bytes(&recv_buf_vec, 0);
 
-                    let mut inner_offset = HEADER_SIZE;
+                    let mut inner_offset = 0;
                     for _ in 0..new_header.qd_count {
                         let new_qn = DNSQuestion::from_bytes(&recv_buf_vec, inner_offset);
                         inner_offset += new_qn.to_bytes().len();

@@ -351,6 +351,7 @@ fn main() {
                     let mut clone_header = header.clone();
                     clone_header.qd_count = 1;
                     clone_header.qr = 0;
+                    clone_header.r_code = 0;
 
                     let mut clone_question = question.clone();
                     clone_question.query_class = question.query_class;

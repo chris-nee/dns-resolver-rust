@@ -333,7 +333,7 @@ fn main() {
                     for _ in 0..new_header.qd_count {
                         let new_qn = DNSQuestion::from_bytes(&recv_buf_vec, inner_offset);
                         inner_offset += new_qn.to_bytes().len();
-                        println!("The qn {:}", new_qn.domain_t name);
+                        println!("The qn {:}", new_qn.domain_name);
 
                         let new_ans = DNSAnswer::from_bytes(&recv_buf_vec, inner_offset);
                         answer_packets.push(new_ans.clone());

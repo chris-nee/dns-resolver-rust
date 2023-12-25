@@ -367,7 +367,7 @@ fn main() {
                     let (size, _) = udp_socket_2
                         .recv_from(&mut recv_buf)
                         .expect("Unable to receive");
-                    println!("RECEIVED");
+                    println!("RECEIVED, size ({})", size);
 
                     let mut recv_buf_vec = Vec::new();
                     recv_buf_vec.extend_from_slice(&recv_buf[..size]);

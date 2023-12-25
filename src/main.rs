@@ -304,7 +304,7 @@ fn main() {
 
                     // Forward to dns server
                     let mut query = Vec::new();
-                    let mut clone_header = header.clone(); //.qd_count = 1;
+                    let mut clone_header = header.clone();
                     clone_header.qd_count = 1;
                     clone_header.qr = 0;
                     query.extend(clone_header.to_bytes());
@@ -337,6 +337,7 @@ fn main() {
 
                         let new_ans = DNSAnswer::from_bytes(&recv_buf_vec, inner_offset);
                         answer_packets.push(new_ans.clone());
+                        println!("The ans {:}", new_ans.name);
                     }
                 }
 
@@ -347,15 +348,6 @@ fn main() {
                 for answer in answer_packets {
                     response.extend(answer.to_bytes());
                 }
-
-                /*
-                for question_domain_name in question_domain_names {
-                    let answer =
-                        DNSAnswer::new(question_domain_name.clone(), 1, 1, 60, 4, vec![8, 8, 8, 8]);
-                    response.extend(answer.to_bytes());
-                    // test
-                }
-                */
 
                 udp_socket
                     .send_to(&response, source)

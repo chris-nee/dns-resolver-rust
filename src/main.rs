@@ -318,7 +318,9 @@ fn main() {
 
                     println!("RECEIVING");
                     let mut recv_buf: [u8; 1024] = [0; 1024];
-                    let (size, _) = udp_socket_2.recv_from(&mut recv_buf).unwrap();
+                    let (size, _) = udp_socket_2
+                        .recv_from(&mut recv_buf)
+                        .expect("Unable to receive");
                     println!("RECEIVED");
 
                     let mut recv_buf_vec = Vec::new();

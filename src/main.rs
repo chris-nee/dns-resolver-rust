@@ -294,7 +294,7 @@ fn main() {
                 let mut myoffset = HEADER_SIZE;
                 for _ in 0..header.qd_count {
                     let question = DNSQuestion::from_bytes(&byte_arr, myoffset);
-                    myoffset = question.idx_offset; // question.to_bytes().len();
+                    myoffset = question.idx_offset + 1; // question.to_bytes().len();
                     println!(
                         "[DEBUG] /// The qn [{:}], The offset [[[{:}]]] ///",
                         question.domain_name.clone(),

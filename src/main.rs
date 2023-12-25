@@ -298,8 +298,7 @@ fn main() {
                 println!(">>> DEBUGGING");
                 let mut myoffset = HEADER_SIZE;
                 for _ in 0..header.qd_count {
-                    let question = DNSQuestion::from_bytes(&byte_arr.clone(), myoffset);
-
+                    let question = DNSQuestion::from_bytes(&byte_arr, myoffset);
                     myoffset += question.to_bytes().len();
                     println!(
                         "[DEBUG] The qn {:}, The offset {:}",

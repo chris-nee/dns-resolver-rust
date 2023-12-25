@@ -347,8 +347,7 @@ fn main() {
                     let mut recv_buf_vec = Vec::new();
                     recv_buf_vec.extend_from_slice(&recv_buf[..size]);
 
-                    let mut new_header = DNSHeader::from_bytes(&recv_buf_vec, 0);
-                    new_header.qd_count = 1;
+                    let new_header = DNSHeader::from_bytes(&recv_buf_vec, 0);
 
                     let mut inner_offset = HEADER_SIZE;
                     for _ in 0..new_header.qd_count {

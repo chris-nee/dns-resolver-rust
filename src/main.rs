@@ -294,7 +294,7 @@ fn main() {
                     let question = DNSQuestion::from_bytes(&byte_arr, myoffset);
                     myoffset += question.to_bytes().len();
                     println!(
-                        "[DEBUG] /// The qn [{:}], The offset [{:}] ///",
+                        "[DEBUG] /// The qn [{:}], The offset [[[{:}]]] ///",
                         question.domain_name.clone(),
                         myoffset.clone()
                     );

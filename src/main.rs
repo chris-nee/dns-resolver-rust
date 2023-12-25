@@ -147,7 +147,7 @@ impl DNSQuestion {
         let mut should_break = false;
         // let mut bytes_read = 0;
 
-        while idx <= byte_arr.len() && should_break == false {
+        while idx < byte_arr.len() && should_break == false {
             if byte_arr[idx] as u8 == 0 {
                 should_break = true;
                 if str_item.len() == 0 {
@@ -174,6 +174,13 @@ impl DNSQuestion {
                 str_item.extend_from_slice(&byte_arr[idx_offset + 1..idx_offset + 1 + label_len]);
                 str_item.push(46); // "."
                 idx += 1;
+                println!("LEN: ({})", label_len);
+                println!(
+                    "STR: ({:})",
+                    String::from_utf8_lossy(
+                        &byte_arr.clone()[idx_offset + 1..idx_offset + 1 + label_len]
+                    )
+                );
                 //  bytes_read += label_len + 1;
             } else if msg_type == 0 {
                 let label_len = byte_arr[idx] as usize;

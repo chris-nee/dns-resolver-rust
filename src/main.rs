@@ -311,7 +311,8 @@ fn main() {
 
                     println!("SENDING");
                     udp_socket_2
-                        .send_to(&query, &resolver.clone())
+                        // .send_to(&query, &resolver.clone())
+                        .send_to(&buf.clone(), &resolver.clone())
                         .expect("Unable to send to resolver");
 
                     println!("SENT");

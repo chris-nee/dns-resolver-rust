@@ -268,7 +268,7 @@ fn main() {
     // Uncomment this block to pass the first stage
     let udp_socket = UdpSocket::bind("127.0.0.1:2053").expect("Failed to bind to address");
     let udp_socket_2 = UdpSocket::bind("0.0.0.0:0").expect("Failed to bind to address");
-    let mut buf = [0; 512];
+    let mut buf = [0; 1024];
 
     const HEADER_SIZE: usize = 12; // bytes
 
@@ -307,12 +307,13 @@ fn main() {
                     let mut clone_header = header.clone(); //.qd_count = 1;
                     clone_header.qd_count = 1;
                     query.extend(clone_header.to_bytes());
-                    query.extend(question.to_bytes());
+                    query.extend(question.clone().to_bytes());
 
                     println!("SENDING");
                     udp_socket_2
                         .send_to(&query, &resolver.clone())
                         .expect("Unable to send to resolver");
+
                     println!("SENT");
 
                     println!("RECEIVING");

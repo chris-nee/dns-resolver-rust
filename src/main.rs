@@ -231,10 +231,10 @@ impl DNSHeader {
         let ra = (byte_arr[offset + 3] as u8 & ((0b00000001) << 7)) >> 7;
         let z = (byte_arr[offset + 3] as u8 & ((0b00000111) << 4)) >> 4;
         let r_code = byte_arr[offset + 3] as u8 & (0b00001111);
-        let qd_count = (byte_arr[offset + 4] as u16) << 8 | byte_arr[offset + 5] as u16;
-        let an_count = (byte_arr[offset + 6] as u16) << 8 | byte_arr[offset + 7] as u16;
-        let rs_count = (byte_arr[offset + 8] as u16) << 8 | byte_arr[offset + 9] as u16;
-        let ar_count = (byte_arr[offset + 10] as u16) << 8 | byte_arr[offset + 11] as u16;
+        let qd_count = u16::from_be_bytes([byte_arr[offset + 4], byte_arr[offset + 5]]);
+        let an_count = u16::from_be_bytes([byte_arr[offset + 6], byte_arr[offset + 7]]);
+        let rs_count = u16::from_be_bytes([byte_arr[offset + 8], byte_arr[offset + 9]]);
+        let ar_count = u16::from_be_bytes([byte_arr[offset + 10], byte_arr[offset + 11]]);
 
         Self {
             id,
@@ -314,7 +314,7 @@ fn main() {
                     let mut inner_header = DNSHeader::new();
                     inner_header.qd_count = 1;
 
-                    let mut clone_question = question.clone();
+                    let clone_question = question.clone();
 
                     query.extend(inner_header.to_bytes());
                     query.extend(clone_question.to_bytes());

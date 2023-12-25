@@ -1,3 +1,4 @@
+use rand::Rng;
 use std::{env, net::UdpSocket};
 
 #[derive(Default, Clone, Debug)]
@@ -336,7 +337,7 @@ fn main() {
                 println!("<<< DEBUGGING");
 
                 let mut q_offset = HEADER_SIZE;
-                for iid in 0..header.qd_count {
+                for _ in 0..header.qd_count {
                     let question = DNSQuestion::from_bytes(&byte_arr, q_offset);
 
                     q_offset += question.to_bytes().len();
@@ -349,7 +350,8 @@ fn main() {
                     // Forward to dns server
                     let mut query = Vec::new();
                     let mut clone_header = header.clone();
-                    clone_header.id = iid;
+                    let mut rng = rand::thread_rng();
+                    clone_header.id = rng.gen::<u16>();
                     clone_header.qd_count = 1;
                     clone_header.qr = 0;
 

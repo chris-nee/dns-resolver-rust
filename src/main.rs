@@ -300,7 +300,7 @@ fn main() {
                 for _ in 0..header.qd_count {
                     let question = DNSQuestion::from_bytes(&byte_arr, q_offset);
 
-                    q_offset += question.to_bytes().len();
+                    q_offset += question.to_bytes().len() - 1;
                     println!(
                         "The qn {:}, The offset {:}",
                         question.domain_name.clone(),

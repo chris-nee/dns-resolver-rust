@@ -113,7 +113,7 @@ struct DNSQuestion {
 }
 impl DNSQuestion {
     pub fn from_bytes(byte_arr: &Vec<u8>, offset: usize) -> Self {
-        if offset + 5 >= byte_arr.len() {
+        if offset + 5 > byte_arr.len() {
             return Self {
                 domain_name: String::new(),
                 query_type: 1,

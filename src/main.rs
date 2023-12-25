@@ -306,13 +306,13 @@ fn main() {
                     let mut query = Vec::new();
                     let mut clone_header = header.clone(); //.qd_count = 1;
                     clone_header.qd_count = 1;
-                    query.extend(clone_header.to_bytes());
-                    query.extend(question.clone().to_bytes());
+                    query.extend(header.to_bytes());
+                    query.extend(question.to_bytes());
 
                     println!("SENDING");
                     udp_socket_2
-                        // .send_to(&query, &resolver.clone())
-                        .send_to(&buf.clone(), &resolver.clone())
+                        .send_to(&query.clone(), &resolver.clone())
+                        // .send_to(&buf.clone(), &resolver.clone())
                         .expect("Unable to send to resolver");
 
                     println!("SENT");

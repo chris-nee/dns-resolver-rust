@@ -354,6 +354,16 @@ fn main() {
                     clone_header.id = rng.gen::<u16>();
                     clone_header.qd_count = 1;
                     clone_header.qr = 0;
+                    clone_header.opcode = 0;
+                    clone_header.aa = 0;
+                    clone_header.tc = 0;
+                    clone_header.rd = 0;
+                    clone_header.ra = 0;
+                    clone_header.z = 0;
+                    clone_header.r_code = 0;
+                    clone_header.an_count = 0;
+                    clone_header.rs_count = 0;
+                    clone_header.ar_count = 0;
 
                     let mut clone_question = question.clone();
                     clone_question.query_class = question.query_class;

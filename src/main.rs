@@ -426,9 +426,23 @@ fn main() {
 
                 let mut question_domain_names: Vec<String> = Vec::new();
 
+                // Just for printing
+                println!(">>> DEBUGGING");
+                let mut myoffset = HEADER_SIZE;
+                for _ in 0..header.qd_count {
+                    let question = DNSQuestion::from_bytes(&byte_arr, myoffset);
+                    myoffset += question.to_bytes().len(); // question.to_bytes().len();
+                    println!(
+                        "[DEBUG] /// The qn [{:}], The offset [[[{:}]]] ///",
+                        question.domain_name.clone(),
+                        myoffset.clone()
+                    );
+                }
+
                 let mut q_offset = HEADER_SIZE;
                 for _ in 0..header.qd_count {
                     let question = DNSQuestion::from_bytes(&byte_arr, q_offset);
+
                     response.extend(question.to_bytes());
                     question_domain_names.push(question.domain_name.clone());
                     q_offset += question.to_bytes().len();

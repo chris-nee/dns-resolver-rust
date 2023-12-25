@@ -131,12 +131,12 @@ impl DNSQuestion {
                 should_break = true;
 
                 if str_item.len() == 0 {
-                    idx += 1; // byte_arr.len();
+                    idx += 1;
                     break;
                 }
 
                 str_item.pop(); // remove the last "."
-                idx += 1; //byte_arr.len();
+                idx += 1;
                 continue;
             }
 
@@ -151,7 +151,6 @@ impl DNSQuestion {
                     u16::from_be_bytes([byte_arr[idx], byte_arr[idx + 1]]) as usize;
 
                 idx_offset &= 0b0011111111111111;
-                // idx_offset -= 12; // account for header
                 let label_len: usize = byte_arr[idx_offset] as usize;
                 str_item.extend_from_slice(&byte_arr[idx_offset + 1..idx_offset + 1 + label_len]);
 
@@ -348,7 +347,8 @@ fn main() {
                     let mut recv_buf_vec = Vec::new();
                     recv_buf_vec.extend_from_slice(&recv_buf[..size]);
 
-                    let new_header = DNSHeader::from_bytes(&recv_buf_vec, 0);
+                    let mut new_header = DNSHeader::from_bytes(&recv_buf_vec, 0);
+                    new_header.qd_count = 1;
 
                     let mut inner_offset = HEADER_SIZE;
                     for _ in 0..new_header.qd_count {

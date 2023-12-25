@@ -34,12 +34,12 @@ impl DNSAnswer {
                 should_break = true;
 
                 if str_item.len() == 0 {
-                    idx += 1; // byte_arr.len();
+                    idx += 1;
                     break;
                 }
 
                 str_item.pop(); // remove the last "."
-                idx += 1; //byte_arr.len();
+                idx += 1;
                 continue;
             }
 
@@ -54,7 +54,6 @@ impl DNSAnswer {
                     u16::from_be_bytes([byte_arr[idx], byte_arr[idx + 1]]) as usize;
 
                 idx_offset &= 0b0011111111111111;
-                // idx_offset -= 12; // account for header
                 let label_len: usize = byte_arr[idx_offset] as usize;
                 str_item.extend_from_slice(&byte_arr[idx_offset + 1..idx_offset + 1 + label_len]);
                 str_item.push(46); // "."
@@ -202,6 +201,26 @@ struct DNSHeader {
 }
 
 impl DNSHeader {
+    fn new() -> Self {
+        let mut rng = rand::thread_rng();
+
+        Self {
+            id: rng.gen::<u16>(),
+            qr: 0,
+            opcode: 0,
+            aa: 0,
+            tc: 0,
+            rd: 0,
+            ra: 0,
+            z: 0,
+            r_code: 0,
+            qd_count: 0,
+            an_count: 0,
+            rs_count: 0,
+            ar_count: 0,
+        }
+    }
+
     fn from_bytes(byte_arr: &Vec<u8>, offset: usize) -> Self {
         let id = (byte_arr[offset + 0] as u16) << 8 | byte_arr[offset + 1] as u16;
         let qr = (byte_arr[offset + 2] as u8 & ((0b00000001) << 7)) >> 7;
@@ -293,21 +312,7 @@ fn main() {
 
                     // Forward to dns server
                     let mut query = Vec::new();
-                    let mut clone_header = header.clone();
-                    let mut rng = rand::thread_rng();
-                    clone_header.id = rng.gen::<u16>();
-                    clone_header.qd_count = 1;
-                    clone_header.qr = 0;
-                    clone_header.opcode = 0;
-                    clone_header.aa = 0;
-                    clone_header.tc = 0;
-                    clone_header.rd = 0;
-                    clone_header.ra = 0;
-                    clone_header.z = 0;
-                    clone_header.r_code = 0;
-                    clone_header.an_count = 0;
-                    clone_header.rs_count = 0;
-                    clone_header.ar_count = 0;
+                    let clone_header = DNSHeader::new();
 
                     let mut clone_question = question.clone();
                     clone_question.query_class = question.query_class;

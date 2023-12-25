@@ -186,6 +186,12 @@ impl DNSQuestion {
                 let label_len = byte_arr[idx] as usize;
                 str_item.extend_from_slice(&byte_arr[idx + 1..idx + 1 + label_len]);
                 str_item.push(46); // "."
+
+                println!("LEN: ({})", label_len);
+                println!(
+                    "STR: ({:})",
+                    String::from_utf8_lossy(&byte_arr.clone()[idx + 1..idx + 1 + label_len])
+                );
                 idx += label_len + 1;
                 // bytes_read += label_len + 1;
             }

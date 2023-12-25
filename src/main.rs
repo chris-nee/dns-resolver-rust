@@ -352,7 +352,7 @@ fn main() {
                     clone_header.qd_count = header.qd_count;
                     clone_header.qr = 0;
                     query.extend(clone_header.to_bytes());
-                    query.extend(question.to_bytes());
+                    query.extend(question.clone().to_bytes());
 
                     println!("SENDING");
                     udp_socket_2

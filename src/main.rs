@@ -351,12 +351,17 @@ fn main() {
                     let mut clone_header = header.clone();
                     clone_header.qd_count = header.qd_count;
                     clone_header.qr = 0;
+
+                    let mut clone_question = question.clone();
+                    clone_question.query_class = question.query_class;
+                    clone_question.query_type = question.query_type;
+
                     query.extend(clone_header.to_bytes());
-                    query.extend(question.clone().to_bytes());
+                    query.extend(clone_question.to_bytes());
 
                     println!("SENDING");
                     udp_socket_2
-                        .send_to(&query.clone(), &resolver.clone())
+                        .send_to(&query, &resolver.clone())
                         .expect("Unable to send to resolver");
 
                     println!("SENT");

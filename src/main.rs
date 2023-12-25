@@ -57,7 +57,7 @@ impl DNSAnswer {
                 let label_len: usize = byte_arr[idx_offset] as usize;
                 str_item.extend_from_slice(&byte_arr[idx_offset + 1..idx_offset + 1 + label_len]);
                 str_item.push(46); // "."
-                idx += 1;
+                idx = idx_offset + label_len + 1;
             } else if msg_type == 0 {
                 let label_len = byte_arr[idx] as usize;
                 str_item.extend_from_slice(&byte_arr[idx + 1..idx + 1 + label_len]);
@@ -69,13 +69,15 @@ impl DNSAnswer {
 
         Self {
             name: String::from_utf8(str_item.clone()).unwrap(),
-            field_type: byte_arr[idx] as u16 | byte_arr[idx + 1] as u16,
-            class: byte_arr[idx + 2] as u16 | byte_arr[idx + 3] as u16,
-            ttl: byte_arr[idx + 4] as u32
-                | byte_arr[idx + 5] as u32
-                | byte_arr[idx + 6] as u32
-                | byte_arr[idx + 7] as u32,
-            rd_len: byte_arr[idx + 8] as u16 | byte_arr[idx + 9] as u16,
+            field_type: u16::from_be_bytes([byte_arr[idx], byte_arr[idx + 1]]),
+            class: u16::from_be_bytes([byte_arr[idx + 2], byte_arr[idx + 3]]),
+            ttl: u32::from_be_bytes([
+                byte_arr[idx + 4],
+                byte_arr[idx + 5],
+                byte_arr[idx + 6],
+                byte_arr[idx + 7],
+            ]),
+            rd_len: u16::from_be_bytes([byte_arr[idx + 8], byte_arr[idx + 9]]),
             rdata: vec![
                 byte_arr[idx + 10],
                 byte_arr[idx + 11],

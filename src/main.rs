@@ -317,7 +317,7 @@ fn main() {
                     println!("SENT");
 
                     println!("RECEIVING");
-                    let mut recv_buf: [u8; 512] = [0; 512];
+                    let mut recv_buf: [u8; 1024] = [0; 1024];
                     let (size, _) = udp_socket_2.recv_from(&mut recv_buf).unwrap();
                     println!("RECEIVED");
 

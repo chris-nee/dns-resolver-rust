@@ -345,7 +345,6 @@ fn main() {
                         question.domain_name.clone(),
                         q_offset.clone()
                     );
-                    question_packets.push(question.clone());
 
                     // Forward to dns server
                     let mut query = Vec::new();
@@ -372,17 +371,18 @@ fn main() {
                     let mut recv_buf_vec = Vec::new();
                     recv_buf_vec.extend_from_slice(&recv_buf[..size]);
 
-                    // let new_header = DNSHeader::from_bytes(&recv_buf_vec, 0);
+                    let new_header = DNSHeader::from_bytes(&recv_buf_vec, 0);
 
                     let mut inner_offset = HEADER_SIZE;
-                    // for _ in 0..new_header.qd_count {
-                    let new_qn = DNSQuestion::from_bytes(&recv_buf_vec, inner_offset);
-                    inner_offset += new_qn.to_bytes().len();
+                    for _ in 0..new_header.qd_count {
+                        let new_qn = DNSQuestion::from_bytes(&recv_buf_vec, inner_offset);
+                        inner_offset += new_qn.to_bytes().len();
+                        question_packets.push(new_qn.clone());
 
-                    let new_ans = DNSAnswer::from_bytes(&recv_buf_vec, inner_offset);
-                    answer_packets.push(new_ans.clone());
-                    println!("The ans {:}", new_ans.name);
-                    // }
+                        let new_ans = DNSAnswer::from_bytes(&recv_buf_vec, inner_offset);
+                        answer_packets.push(new_ans.clone());
+                        println!("The ans {:}", new_ans.name);
+                    }
                 }
 
                 for question in question_packets {

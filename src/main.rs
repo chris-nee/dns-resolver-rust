@@ -110,18 +110,16 @@ struct DNSQuestion {
     domain_name: String,
     query_type: u16,
     query_class: u16,
-    dot_count: usize,
+    byte_offset: usize,
 }
 impl DNSQuestion {
     pub fn from_bytes(byte_arr: &Vec<u8>, offset: usize) -> Self {
-        let mut dot_count = 0;
-
         if offset + 5 >= byte_arr.len() {
             return Self {
                 domain_name: String::new(),
                 query_type: 1,
                 query_class: 1,
-                dot_count,
+                byte_offset: offset,
             };
         }
 
@@ -140,7 +138,6 @@ impl DNSQuestion {
                 }
 
                 str_item.pop(); // remove the last "."
-                dot_count -= 1;
                 idx += 1; //byte_arr.len();
                 continue;
             }
@@ -161,14 +158,12 @@ impl DNSQuestion {
                 str_item.extend_from_slice(&byte_arr[idx_offset + 1..idx_offset + 1 + label_len]);
 
                 str_item.push(46); // "."
-                dot_count += 1;
                 idx += 1;
             } else if msg_type == 0 {
                 let label_len = byte_arr[idx] as usize;
                 str_item.extend_from_slice(&byte_arr[idx + 1..idx + 1 + label_len]);
 
                 str_item.push(46); // "."
-                dot_count += 1;
                 idx += label_len + 1;
             }
         }
@@ -177,7 +172,7 @@ impl DNSQuestion {
             domain_name: String::from_utf8(str_item.clone()).unwrap(),
             query_type: byte_arr[idx] as u16 | byte_arr[idx + 1] as u16,
             query_class: byte_arr[idx + 2] as u16 | byte_arr[idx + 3] as u16,
-            dot_count,
+            byte_offset: idx + 3 + 1,
         }
     }
 
@@ -308,7 +303,7 @@ fn main() {
                 for _ in 0..header.qd_count {
                     let question = DNSQuestion::from_bytes(&byte_arr, q_offset);
 
-                    q_offset += question.clone().to_bytes().len() - question.dot_count;
+                    q_offset = question.byte_offset; // .clone().to_bytes().len();
                     println!(
                         "The qn {:}, The offset {:}",
                         question.domain_name.clone(),
@@ -347,7 +342,7 @@ fn main() {
                     let mut inner_offset = HEADER_SIZE;
                     for _ in 0..new_header.qd_count {
                         let new_qn = DNSQuestion::from_bytes(&recv_buf_vec, inner_offset);
-                        inner_offset += new_qn.to_bytes().len() - new_qn.dot_count;
+                        inner_offset = new_qn.byte_offset; //  += new_qn.to_bytes().len();
 
                         let new_ans = DNSAnswer::from_bytes(&recv_buf_vec, inner_offset);
                         answer_packets.push(new_ans.clone());

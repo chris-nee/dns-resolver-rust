@@ -134,6 +134,13 @@ impl DNSQuestion {
                     idx += 1; // byte_arr.len();
                     break;
                 }
+                // DEBUG
+                println!(">>> [DEBUG]");
+                for str_i in str_item {
+                    println!("THE ITEMS {:}", str_i);
+                }
+                println!("<<< [DEBUG]");
+
                 str_item.pop(); // remove the last "."
                 idx += 1; //byte_arr.len();
                 continue;

@@ -267,7 +267,7 @@ fn main() {
     println!("Logs from your program will appear here!");
     // Uncomment this block to pass the first stage
     let udp_socket = UdpSocket::bind("127.0.0.1:2053").expect("Failed to bind to address");
-    let udp_socket_2 = UdpSocket::bind("127.0.0.1:0").expect("Failed to bind to address");
+    let udp_socket_2 = UdpSocket::bind(resolver.clone()).expect("Failed to bind to address");
     let mut buf = [0; 1024];
 
     const HEADER_SIZE: usize = 12; // bytes

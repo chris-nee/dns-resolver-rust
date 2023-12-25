@@ -173,7 +173,7 @@ impl DNSQuestion {
                 let label_len: usize = byte_arr[idx_offset] as usize;
                 str_item.extend_from_slice(&byte_arr[idx_offset + 1..idx_offset + 1 + label_len]);
                 str_item.push(46); // "."
-                idx = idx_offset + 1;
+                idx = idx_offset + label_len + 1;
                 println!("LEN: ({})", label_len);
                 println!(
                     "STR: ({:})",

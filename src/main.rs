@@ -315,8 +315,6 @@ fn main() {
                     inner_header.qd_count = 1;
 
                     let mut clone_question = question.clone();
-                    clone_question.query_class = question.query_class;
-                    clone_question.query_type = question.query_type;
 
                     query.extend(inner_header.to_bytes());
                     query.extend(clone_question.to_bytes());

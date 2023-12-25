@@ -295,22 +295,22 @@ fn main() {
                 let mut question_packets: Vec<DNSQuestion> = Vec::new();
                 let mut answer_packets: Vec<DNSAnswer> = Vec::new();
 
-                let mut q_offset = HEADER_SIZE;
-
                 // Just for printing
                 println!(">>> DEBUGGING");
+                let mut myoffset = HEADER_SIZE;
                 for _ in 0..header.qd_count {
-                    let question = DNSQuestion::from_bytes(&byte_arr, q_offset);
+                    let question = DNSQuestion::from_bytes(&byte_arr.clone(), myoffset);
 
-                    q_offset += question.to_bytes().len();
+                    myoffset += question.to_bytes().len();
                     println!(
                         "[DEBUG] The qn {:}, The offset {:}",
                         question.domain_name.clone(),
-                        q_offset.clone()
+                        myoffset.clone()
                     );
                 }
                 println!("<<< DEBUGGING");
 
+                let mut q_offset = HEADER_SIZE;
                 for _ in 0..header.qd_count {
                     let question = DNSQuestion::from_bytes(&byte_arr, q_offset);
 

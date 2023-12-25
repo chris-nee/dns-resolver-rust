@@ -298,7 +298,13 @@ fn main() {
 
                 for _ in 0..header.qd_count {
                     let question = DNSQuestion::from_bytes(&byte_arr, q_offset);
+
                     q_offset += question.clone().to_bytes().len();
+                    println!(
+                        "The qn {:}, The offset {:}",
+                        question.domain_name.clone(),
+                        q_offset.clone()
+                    );
                     question_packets.push(question.clone());
 
                     // Forward to dns server
@@ -333,7 +339,6 @@ fn main() {
                     for _ in 0..new_header.qd_count {
                         let new_qn = DNSQuestion::from_bytes(&recv_buf_vec, inner_offset);
                         inner_offset += new_qn.to_bytes().len();
-                        println!("The qn {:}", new_qn.domain_name);
 
                         let new_ans = DNSAnswer::from_bytes(&recv_buf_vec, inner_offset);
                         answer_packets.push(new_ans.clone());

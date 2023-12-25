@@ -110,7 +110,6 @@ struct DNSQuestion {
     domain_name: String,
     query_type: u16,
     query_class: u16,
-    byte_offset: usize,
 }
 impl DNSQuestion {
     pub fn from_bytes(byte_arr: &Vec<u8>, offset: usize) -> Self {
@@ -119,7 +118,6 @@ impl DNSQuestion {
                 domain_name: String::new(),
                 query_type: 1,
                 query_class: 1,
-                byte_offset: offset,
             };
         }
 
@@ -172,7 +170,6 @@ impl DNSQuestion {
             domain_name: String::from_utf8(str_item.clone()).unwrap(),
             query_type: byte_arr[idx] as u16 | byte_arr[idx + 1] as u16,
             query_class: byte_arr[idx + 2] as u16 | byte_arr[idx + 3] as u16,
-            byte_offset: idx + 3 + 1,
         }
     }
 
@@ -303,7 +300,7 @@ fn main() {
                 for _ in 0..header.qd_count {
                     let question = DNSQuestion::from_bytes(&byte_arr, q_offset);
 
-                    q_offset = question.byte_offset; // .clone().to_bytes().len();
+                    q_offset = question.to_bytes().len();
                     println!(
                         "The qn {:}, The offset {:}",
                         question.domain_name.clone(),
@@ -342,7 +339,7 @@ fn main() {
                     let mut inner_offset = HEADER_SIZE;
                     for _ in 0..new_header.qd_count {
                         let new_qn = DNSQuestion::from_bytes(&recv_buf_vec, inner_offset);
-                        inner_offset = new_qn.byte_offset; //  += new_qn.to_bytes().len();
+                        inner_offset += new_qn.to_bytes().len();
 
                         let new_ans = DNSAnswer::from_bytes(&recv_buf_vec, inner_offset);
                         answer_packets.push(new_ans.clone());

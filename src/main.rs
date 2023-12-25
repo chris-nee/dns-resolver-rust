@@ -12,25 +12,6 @@ struct DNSAnswer {
 }
 
 impl DNSAnswer {
-    /*
-    fn new(
-        name: String,
-        field_type: u16,
-        class: u16,
-        ttl: u32,
-        rd_len: u16,
-        rdata: Vec<u8>,
-    ) -> Self {
-        Self {
-            name,
-            field_type,
-            class,
-            ttl,
-            rd_len,
-            rdata,
-        }
-    }
-    */
     fn from_bytes(byte_arr: &Vec<u8>, offset: usize) -> Self {
         if offset + 5 >= byte_arr.len() {
             return Self {
@@ -138,7 +119,6 @@ impl DNSQuestion {
                 domain_name: String::new(),
                 query_type: 1,
                 query_class: 1,
-                //          bytes_read: 0,
             };
         }
         let mut idx: usize = offset;
@@ -149,12 +129,12 @@ impl DNSQuestion {
             if byte_arr[idx] as u8 == 0 {
                 should_break = true;
                 if str_item.len() == 0 {
-                    idx += 1; // byte_arr.len();
+                    idx += 1;
                     break;
                 }
 
                 str_item.pop(); // remove the last "."
-                idx += 1; //byte_arr.len();
+                idx += 1;
                 continue;
             }
 
@@ -172,24 +152,10 @@ impl DNSQuestion {
                 str_item.extend_from_slice(&byte_arr[idx_offset + 1..idx_offset + 1 + label_len]);
                 str_item.push(46); // "."
                 idx = idx_offset + label_len + 1;
-                println!("LEN: ({})", label_len);
-                println!(
-                    "STR: ({:})",
-                    String::from_utf8_lossy(
-                        &byte_arr.clone()[idx_offset + 1..idx_offset + 1 + label_len]
-                    )
-                );
-                //  bytes_read += label_len + 1;
             } else if msg_type == 0 {
                 let label_len = byte_arr[idx] as usize;
                 str_item.extend_from_slice(&byte_arr[idx + 1..idx + 1 + label_len]);
                 str_item.push(46); // "."
-
-                println!("LEN: ({})", label_len);
-                println!(
-                    "STR: ({:})",
-                    String::from_utf8_lossy(&byte_arr.clone()[idx + 1..idx + 1 + label_len])
-                );
                 idx += label_len + 1;
             }
         }
@@ -287,10 +253,7 @@ impl DNSHeader {
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    println!("{:?}", args);
-
     let resolver = args[2].clone();
-    println!(" THE RESOLVER IS -> {:?}", resolver);
 
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     println!("Logs from your program will appear here!");
@@ -322,30 +285,11 @@ fn main() {
                 let mut question_packets: Vec<DNSQuestion> = Vec::new();
                 let mut answer_packets: Vec<DNSAnswer> = Vec::new();
 
-                // Just for printing
-                println!(">>> DEBUGGING");
-                let mut myoffset = HEADER_SIZE;
-                for _ in 0..header.qd_count {
-                    let question = DNSQuestion::from_bytes(&byte_arr, myoffset);
-                    myoffset += question.to_bytes().len();
-                    println!(
-                        "[DEBUG] /// The qn [{:}], The offset [[[{:}]]] ///",
-                        question.domain_name.clone(),
-                        myoffset.clone()
-                    );
-                }
-                println!("<<< DEBUGGING");
-
                 let mut q_offset = HEADER_SIZE;
                 for _ in 0..header.qd_count {
                     let question = DNSQuestion::from_bytes(&byte_arr, q_offset);
 
                     q_offset += question.to_bytes().len();
-                    println!(
-                        "The qn {:}, The offset {:}",
-                        question.domain_name.clone(),
-                        q_offset.clone()
-                    );
 
                     // Forward to dns server
                     let mut query = Vec::new();
@@ -372,19 +316,14 @@ fn main() {
                     query.extend(clone_header.to_bytes());
                     query.extend(clone_question.to_bytes());
 
-                    println!("SENDING");
                     udp_socket_2
                         .send_to(&query, &resolver.clone())
                         .expect("Unable to send to resolver");
 
-                    println!("SENT");
-
-                    println!("RECEIVING");
                     let mut recv_buf: [u8; 1024] = [0; 1024];
                     let (size, _) = udp_socket_2
                         .recv_from(&mut recv_buf)
                         .expect("Unable to receive");
-                    println!("RECEIVED, size ({})", size);
 
                     let mut recv_buf_vec = Vec::new();
                     recv_buf_vec.extend_from_slice(&recv_buf[..size]);
@@ -399,7 +338,6 @@ fn main() {
 
                         let new_ans = DNSAnswer::from_bytes(&recv_buf_vec, inner_offset);
                         answer_packets.push(new_ans.clone());
-                        println!("The ans {:}", new_ans.name);
                     }
                 }
 
@@ -422,72 +360,3 @@ fn main() {
         }
     }
 }
-
-/*
-fn main() {
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
-    println!("Logs from your program will appear here!");
-    // Uncomment this block to pass the first stage
-    let udp_socket = UdpSocket::bind("127.0.0.1:2053").expect("Failed to bind to address");
-    let mut buf = [0; 512];
-    const HEADER_SIZE: usize = 12; // bytes
-    loop {
-        match udp_socket.recv_from(&mut buf) {
-            Ok((size, source)) => {
-                let mut byte_arr: Vec<u8> = Vec::new();
-                byte_arr.extend_from_slice(&buf);
-                println!("Received {} bytes from {}", size, source);
-
-                let mut response = Vec::new();
-                let mut header = DNSHeader::from_bytes(&byte_arr, 0);
-                header.qr = 1;
-                header.an_count = header.qd_count;
-                if header.opcode != 0 {
-                    header.r_code = 4;
-                }
-
-                response.extend(header.to_bytes());
-
-                let mut question_domain_names: Vec<String> = Vec::new();
-
-                // Just for printing
-                println!(">>> DEBUGGING");
-                let mut myoffset = HEADER_SIZE;
-                for _ in 0..header.qd_count {
-                    let question = DNSQuestion::from_bytes(&byte_arr, myoffset);
-                    myoffset += question.to_bytes().len(); // question.to_bytes().len();
-                    println!(
-                        "[DEBUG] /// The qn [{:}], The offset [[[{:}]]] ///",
-                        question.domain_name.clone(),
-                        myoffset.clone()
-                    );
-                }
-
-                let mut q_offset = HEADER_SIZE;
-                for _ in 0..header.qd_count {
-                    let question = DNSQuestion::from_bytes(&byte_arr, q_offset);
-
-                    response.extend(question.to_bytes());
-                    question_domain_names.push(question.domain_name.clone());
-                    q_offset += question.to_bytes().len();
-                }
-
-                for question_domain_name in question_domain_names {
-                    let answer =
-                        DNSAnswer::new(question_domain_name.clone(), 1, 1, 60, 4, vec![8, 8, 8, 8]);
-                    response.extend(answer.to_bytes());
-                }
-
-                udp_socket
-                    .send_to(&response, source)
-                    .expect("Failed to send response");
-            }
-            Err(e) => {
-                eprintln!("Error receiving data: {}", e);
-                break;
-            }
-        }
-    }
-}
-
-*/

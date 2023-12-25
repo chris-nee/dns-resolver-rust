@@ -27,12 +27,10 @@ impl DNSAnswer {
         let mut idx: usize = offset;
         let mut str_item: Vec<u8> = Vec::<u8>::new();
 
-        let mut should_break = false;
+        // let mut should_break = false;
 
-        while idx < byte_arr.len() && should_break == false {
+        while idx < byte_arr.len() {
             if byte_arr[idx] as u8 == 0 {
-                should_break = true;
-
                 if str_item.len() == 0 {
                     idx += 1;
                     break;
@@ -40,11 +38,7 @@ impl DNSAnswer {
 
                 str_item.pop(); // remove the last "."
                 idx += 1;
-                continue;
-            }
-
-            if should_break {
-                continue;
+                break;
             }
 
             let msg_type = ((byte_arr[idx] as u8) >> 6) & 0b00000011;
